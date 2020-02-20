@@ -36,26 +36,25 @@ function profile($message, callable $func) {
     echo $message, $end-$start, PHP_EOL;
 }
 
+$numbers = range(0, 10000000, 1); //generating test data
+shuffle($numbers); //randomize an array
+
 /**
- * Generating and shuffling an array for a sort test.
- * Custom way.
+ * Sorting array for a test.
+ * Custom function.
  */
-$numbers = [];
-profile('custom array generate: ', function() use (&$numbers)
+$sorted =[];
+profile('custom array sort function: ', function() use (&$numbers, &$sorted)
 {
-    for ($i = 0; $i < 10000000; $i++) {
-        $numbers[] = $i;
-    }
-    shuffle($numbers);
+    $sorted = quicksort($numbers);
 });
 
 /**
- * Generating and shuffling an array for a sort test.
- * Functions way.
+ * Sorting array for a test.
+ * PHP sort function.
  */
-$numbers = [];
-profile('internal array generate: ', function() use (&$numbers)
+$sorted =[];
+profile('php array sort function: ', function() use (&$numbers, &$sorted)
 {
-    $numbers = range(0, 10000000, 1);
-    shuffle($numbers);
+    $sorted = sort($numbers);
 });
