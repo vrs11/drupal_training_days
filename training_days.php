@@ -6,10 +6,15 @@
  */
 
 /**
- * Magic numbers.
+ * Functions in cycles.
  */
-// What the heck is 86400 for?
-addExpireAt(86400);
+//Bad Practice:
+for ($i = 0, $i <= count($array);  $i++) {
+//statements
+}
 
-const SECONDS_IN_A_DAY = 86400;
-addExpireAt(DateGlobal::SECONDS_IN_A_DAY);
+//Good Practice:
+$count = count($array);
+for ($i = 0; $i < $count;  $i++) {
+//statements
+}
