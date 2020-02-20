@@ -6,27 +6,6 @@
  */
 
 /**
- * quicksort algorithm for array.
- * identical to php sort function.
- */
-function quicksort($array) {
-    if (($cnt = count($array)) == 0)
-        return [];
-
-    $pivot_element = $array[0];
-    $left_element = $right_element = [];
-
-    for ($i = 1; $i < $cnt; $i++) {
-        if ($array[$i] < $pivot_element)
-            $left_element[] = $array[$i];
-        else
-            $right_element[] = $array[$i];
-    }
-
-    return array_merge(quicksort($left_element), [$pivot_element], quicksort($right_element));
-}
-
-/**
  * Profiling code execution time.
  */
 function profile($message, callable $func) {
@@ -36,25 +15,48 @@ function profile($message, callable $func) {
     echo $message, $end-$start, PHP_EOL;
 }
 
-$numbers = range(0, 10000000, 1); //generating test data
-shuffle($numbers); //randomize an array
-
+$string = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam rhoncus mauris at nisl molestie, 
+           vel viverra elit elementum. Donec nec lobortis purus. Integer auctor nulla nisl, vitae sodales 
+           dui lacinia quis. Nulla id massa nunc. Proin venenatis nisl sed tellus aliquet gravida. Nunc 
+           sollicitudin id augue sit amet commodo. In hac habitasse platea dictumst. Nulla in tellus dolor. 
+           Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Curabitur 
+           non fermentum urna. Suspendisse molestie lacus eget pretium porttitor
+           Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam rhoncus mauris at nisl molestie, 
+           vel viverra elit elementum. Donec nec lobortis purus. Integer auctor nulla nisl, vitae sodales 
+           dui lacinia quis. Nulla id massa nunc. Proin venenatis nisl sed tellus aliquet gravida. Nunc 
+           sollicitudin id augue sit amet commodo. In hac habitasse platea dictumst. Nulla in tellus dolor. 
+           Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Curabitur 
+           non fermentum urna. Suspendisse molestie lacus eget pretium porttitor
+           Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam rhoncus mauris at nisl molestie, 
+           vel viverra elit elementum. Donec nec lobortis purus. Integer auctor nulla nisl, vitae sodales 
+           dui lacinia quis. Nulla id massa nunc. Proin venenatis nisl sed tellus aliquet gravida. Nunc 
+           sollicitudin id augue sit amet commodo. In hac habitasse platea dictumst. Nulla in tellus dolor. 
+           Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Curabitur 
+           non fermentum urna. Suspendisse molestie lacus eget pretium porttitor
+           Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam rhoncus mauris at nisl molestie, 
+           vel viverra elit elementum. Donec nec lobortis purus. Integer auctor nulla nisl, vitae sodales 
+           dui lacinia quis. Nulla id massa nunc. Proin venenatis nisl sed tellus aliquet gravida. Nunc 
+           sollicitudin id augue sit amet commodo. In hac habitasse platea dictumst. Nulla in tellus dolor. 
+           Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Curabitur 
+           non fermentum urna. Suspendisse molestie lacus eget pretium porttitor';
 /**
- * Sorting array for a test.
- * Custom function.
+ * String reverse for a test.
+ * Custom reverse function.
  */
-$sorted =[];
-profile('custom array sort function: ', function() use (&$numbers, &$sorted)
+profile('custom string reverse function: ', function() use (&$string)
 {
-    $sorted = quicksort($numbers);
+    $tmp = '';
+    for ($i = strlen($string) - 1; $i >= 0; $i--) {
+        $tmp .= $string[$i];
+    }
+    $result = $tmp;
 });
 
 /**
- * Sorting array for a test.
- * PHP sort function.
+ * String reverse for a test.
+ * PHP way reverse function.
  */
-$sorted =[];
-profile('php array sort function: ', function() use (&$numbers, &$sorted)
+profile('PHP strrev function: ', function() use (&$string)
 {
-    $sorted = sort($numbers);
+    $result = strrev($string);
 });
