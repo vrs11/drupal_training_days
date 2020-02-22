@@ -1,37 +1,39 @@
 <?php
-
-/**
- * Implemented hook_preprocess_node().
- */
-function pnt_front_preprocess_node__event__homepage_widget_event_teaser(&$variables, $hook) {
+function pnt_front_preprocess_node__service_landing__full(&$variables, $hook) {
     $node = $variables['node'];
+    $current_service_tid = $node->field_service_type->target_id;
+    if (!empty($current_service_tid)) {
+        $term_storage = \Drupal::service('entity_type.manager')
+            ->getStorage('taxonomy_term');
+        $children = $term_storage->loadChildren($current_service_tid, 'service_type');
+        if (!empty($children)) {
+            $view_builder = \Drupal::entityTypeManager()->getViewBuilder('node');
+            $parameters = \Drupal::request()->query->all();
+            $variables['active_filter'] = $parameters['service_filter'];
+            foreach ($children as $tid => $child) {
+                if ($child->hasTranslation($variables['current_language'])) {
+                    $child = $child->getTranslation($variables['current_language']);
+                }
+                $variables['filters'][$tid] = $child->getName();
+                asort($variables['filters']);
+                if (!empty($parameters['service_filter']) && $parameters['service_filter'] !== 'all' && $parameters['service_filter'] != $tid) {
+                    continue;
+                }
+                $related_service_details[$tid] = \Drupal::service('printemps_sl.related_services.loader')
+                    ->loadServiceDetailsPagesByServiceType($tid);
+                if (empty($related_service_details[$tid])) {
+                    continue;
+                }
 
-    $floor = \Drupal::service('entity_type.manager')->getStorage('paragraph')->loadRevision($node->field_event_floor->value);
-    $variables['floor'] = $floor->field_floor->value;
-    $variables['universe'] = $floor->field_floor_description->value;
+                $variables['related_service_details'][$tid] = $view_builder->viewMultiple($related_service_details[$tid], 'teaser_on_service_landing');
+            }
 
-    $from_date = strtotime($node->field_dates->value);
-    $to_date = strtotime($node->field_dates->end_value);
+            array_push($variables['#cache']['contexts'], 'url.query_args:service_filter');
 
-    $dateFormatter = \Drupal::service('date.formatter');
-    $variables['from_date'] = $dateFormatter->format($from_date, 'custom', 'd') . ' ' . t($dateFormatter->format($from_date, 'custom', 'F'));
-    $variables['to_date'] = $dateFormatter->format($to_date, 'custom', 'd') . ' ' . t($dateFormatter->format($to_date, 'custom', 'F'));
-
-    $from_date = $dateFormatter->format($from_date, 'custom', 'Ymd');
-    $to_date = $dateFormatter->format($to_date, 'custom', 'Ymd');
-
-    $current_shop_id = \Drupal::service('pnt_common.floors_with_description_helper')->getStoreByFloorParagraphRevisionId($node->field_event_floor->value);
-    $place_string = '';
-    if (!empty($current_shop_id)) {
-        $current_shop = \Drupal::service('entity_type.manager')
-            ->getStorage('node')
-            ->load(reset($current_shop_id));
-        if ($current_shop && $current_shop instanceof NodeInterface) {
-            $place_string = $current_shop->getTitle();
+            array_push($variables['#cache']['tags'],
+                'node:service_details',
+                'node:service_landing'
+            );
         }
     }
-
-    $description = preg_replace('/\s\s+/', '', strip_tags($node->field_description->value));
-    $variables['google_event_string'] = "https://www.google.com/calendar/render?action=TEMPLATE&text={$node->getTitle()}&dates=$from_date/$to_date&details=$description&location=$place_string&sf=true&output=xml";
-
 }
