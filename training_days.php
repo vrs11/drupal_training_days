@@ -1,51 +1,56 @@
 <?php
 /*
- * Good code examples.
+ * Profiling custom and internal functions.
  * Target: drupal training days.
  * Author: vrs11.
  */
 
 /**
- * {@inheritdoc}
+ * Profiling code execution time.
  */
-public function loadArticlesForStore($limit = NULL) {
-    $langcode = $this->languageManager->getCurrentLanguage()->getId();
-    $store_id = $this->preferredShop->getCurrentShop()->id();
-    $cid  = __FUNCTION__;
-    $cid .= '-';
-    $cid .= $langcode;
-    $cid .= ':';
-    $cid .= $store_id;
-
-    if ($cache_data = $this->cache->get($cid)) {
-        return $cache_data->data['articles'];
-    }
-    else {
-
-        $query = $this->endPointEntities->getEntityTypeManager()->getStorage('node')->getQuery();
-        $query->condition('type', 'editorial');
-        $query->condition(static::STORE_FIELD, $store_id);
-        $query->condition('status', 1);
-        $query->sort('changed', 'DESC');
-        $query->range(0, $limit ?? static::DEFAULT_ARTICLES_CNT);
-        $nids =  $query->execute();
-
-        if (empty($nids)) {
-            return [];
-        }
-
-        $related_articles = $this->endPointEntities
-            ->getEntityTypeManager()
-            ->getStorage('node')
-            ->loadMultiple($nids);
-        foreach ($related_articles as &$article) {
-            if ($article->hasTranslation($langcode)) {
-                $article = $article->getTranslation($langcode);
-            }
-        }
-
-        $this->cache->set($cid, ['articles' => $related_articles], Cache::PERMANENT, ['node:editorial']);
-
-        return $related_articles;
-    }
+function profile($message, callable $func) {
+    $start = microtime(true); //start time of execution in microseconds
+    $func(); //user func to profile
+    $end = microtime(true); //end time of execution in microseconds
+    echo $message, $end-$start, PHP_EOL;
 }
+
+$numbers = range(0, 10000000, 1); //generating test data
+shuffle($numbers); //randomize an array
+
+/**
+ * Sorting array for a test.
+ * Custom function.
+ */
+$sorted =[];
+profile('test 1: ', function() use (&$numbers, &$sorted)
+{
+    $cnt = count($numbers);
+    for ($i = 0; $i < $cnt; $i++) {
+        $sorted[$i] = $numbers[$i];
+    }
+});
+
+/**
+ * Sorting array for a test.
+ * PHP sort function.
+ */
+$sorted =[];
+profile('test 2: ', function() use (&$numbers, &$sorted)
+{
+    foreach ($numbers as $number) {
+        $number = 0;
+    }
+});
+
+/**
+ * Sorting array for a test.
+ * PHP sort function.
+ */
+$sorted =[];
+profile('test 3: ', function() use (&$numbers, &$sorted)
+{
+    foreach ($numbers as &$number) {
+        $number = 0;
+    }
+});
